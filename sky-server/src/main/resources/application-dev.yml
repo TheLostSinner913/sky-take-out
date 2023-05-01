@@ -6,3 +6,19 @@ sky:
     database: sky_take_out
     username: root
     password: dwhsqj913913
+  redis:
+    host: localhost
+    port: 6379
+#    password: dwhsqj913913
+    database: 10
+  wechat:
+    appid: wxa9be3e3edf7053bc
+    secret: 4bd4a3b8fdf269b57b48510f236d741a
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    access-key-id: LTAI5tAmP1YpZDTWQFdW1k6Q
+    accessKeySecret: ZpE9sp5aCyhDV1VpFvhsR99Z81qk5M
+    bucket-name: test-913
+
+

@@ -1,3 +1,4 @@
+/*
 package com.sky.utils;
 
 import com.aliyun.oss.ClientException;
@@ -6,12 +7,19 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
 import java.io.ByteArrayInputStream;
 
 @Data
 @AllArgsConstructor
 @Slf4j
+@Component
+@NoArgsConstructor
 public class AliOssUtil {
 
     private String endpoint;
@@ -19,13 +27,16 @@ public class AliOssUtil {
     private String accessKeySecret;
     private String bucketName;
 
-    /**
+*/
+/**
      * 文件上传
      *
      * @param bytes
      * @param objectName
-     * @return
-     */
+     * @return*//*
+
+
+
     public String upload(byte[] bytes, String objectName) {
 
         // 创建OSSClient实例。
@@ -66,3 +77,4 @@ public class AliOssUtil {
         return stringBuilder.toString();
     }
 }
+*/

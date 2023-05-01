@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.SetMealMapper">
+    <insert id="addMeal" useGeneratedKeys="true" keyProperty="id">
+        insert into setmeal(category_id, name, price, description, image, create_time, update_time, create_user,
+                            update_user)
+        values (#{categoryId}, #{name}, #{price}, #{description}, #{image}, #{createTime}, #{updateTime}, #{createUser},
+                #{updateUser})
+    </insert>
+
+    <insert id="addDish">
+        insert into setmeal_dish(setmeal_id, dish_id, name, price, copies)
+        values (#{setmealId}, #{dishId}, #{name}, #{price}, #{copies})
+    </insert>
+
+    <select id="show" resultType="com.sky.vo.SetmealVO">
+        select s.*, c.name as categoryName
+        from setmeal s,
+             category c
+        <where>
+            s.category_id = c.id
+            <if test="name != null and name != ''">
+                and s.name like concat('%', #{name}, '%')
+            </if>
+            <if test="categoryId != null">
+                and s.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and s.status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <delete id="delete">
+        delete
+        from setmeal where id in
+        <foreach collection="ids" item="id" separator="," close=")" open="(">
+            #{id}
+        </foreach>
+        and status = 0
+    </delete>
+
+    <delete id="deleteSD">
+        delete
+        from setmeal_dish where setmeal_id in
+        <foreach collection="ids" item="id" separator="," close=")" open="(">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getById" resultType="com.sky.vo.SetmealVO">
+        select s.*, c.name as categoryName
+        from setmeal s,
+             category c
+        where s.category_id = c.id
+          and s.id = #{id}
+    </select>
+
+    <select id="getSD" resultType="com.sky.entity.SetmealDish">
+        select *
+        from setmeal_dish
+        where setmeal_id = #{id}
+    </select>
+
+    <update id="update">
+        update setmeal
+        <set>
+            <if test="name != null and name != ''">
+                name=#{name},
+            </if>
+            <if test="categoryId != null">
+                category_id=#{categoryId},
+            </if>
+            <if test="description != null and description != ''">
+                description=#{description},
+            </if>
+            <if test="price != null">
+                price=#{price},
+            </if>
+            <if test="image != null and image != ''">
+                image=#{image},
+            </if>
+            <if test="status != null">
+                status=#{status},
+            </if>
+            <if test="updateTime != null">
+                update_time=#{updateTime},
+            </if>
+            <if test="updateUser != null">
+                update_user=#{updateUser},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteOld">
+        delete
+        from setmeal_dish
+        where setmeal_id = #{setMealId}
+    </delete>
+
+    <select id="checkFromDish" resultType="java.lang.String">
+        select d.name
+        from setmeal s,
+             setmeal_dish sd,
+             dish d
+        where s.id = sd.setmeal_id and sd.dish_id=d.id and s.id=#{id} and d.status=0
+    </select>
+
+    <update id="OnOrOff">
+        update setmeal set status=#{status} where id=#{id}
+    </update>
+</mapper>
