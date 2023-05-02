@@ -12,7 +12,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.invoke.MethodHandle;
 
 /**
  * @Description: 用户JWT令牌拦截
@@ -30,7 +29,7 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
         String token = request.getHeader("authentication");
         try {
             Claims claims = JwtUtil.parseJWT("itheima",token);
-            String str = claims.get("userId").toString();
+            String str = claims.get("id").toString();
             Long userId= Long.valueOf(str);
             BaseContext.setCurrentId(userId);
         } catch (Exception e) {

@@ -17,4 +17,8 @@ public interface UserService {
     Result getById(Long categoryId);
 
     Result getId(Long categoryId);
+
+    Result getDishId(Long id);
+
+    User practice(String code, String url);
 }

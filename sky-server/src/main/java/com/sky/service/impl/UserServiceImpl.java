@@ -4,14 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sky.constant.MessageConstant;
 import com.sky.dto.UserLoginDTO;
-import com.sky.entity.Category;
-import com.sky.entity.User;
+import com.sky.entity.*;
 import com.sky.exception.BaseException;
 import com.sky.mapper.UserMapper;
 import com.sky.properties.WeChatProperties;
 import com.sky.result.Result;
 import com.sky.service.UserService;
 import com.sky.utils.HttpClientUtil;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.DishVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 根据分类ID查询菜品
+     * 根据分类ID查询菜品及其对应口味
      * @param categoryId
      * @return com.sky.result.Result
      * @author 刘东钦
@@ -70,14 +70,54 @@ public class UserServiceImpl implements UserService {
      **/
     @Override
     public Result getById(Long categoryId) {
-        List<DishVO> byId = userMapper.getById(categoryId);
-        return Result.success(byId);
+        List<DishVO> dish = userMapper.getDish(categoryId);
+        for (DishVO dishVO : dish) {
+            Long dishId = dishVO.getId();
+            List<DishFlavor> flavors = userMapper.getflaovr(dishId);
+            dishVO.setFlavors(flavors);
+        }
+        return Result.success(dish);
     }
 
     @Override
     public Result getId(Long categoryId) {
-        List<Category> list = userMapper.getId(categoryId);
+        List<Setmeal> list = userMapper.getId(categoryId);
         return Result.success(list);
+    }
+
+    /**
+     * 根据套餐ID查询菜品
+     * @param id
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/2,12:35
+     **/
+    @Override
+    public Result getDishId(Long id) {
+        List<DishItemVO> set = userMapper.getDishBySetMealId(id);
+        return Result.success(set);
+    }
+
+    @Override
+    public User practice(String code, String url) {
+        HashMap<String,String>hm=new HashMap<>();
+        hm.put("appid","wxa9be3e3edf7053bc");
+        hm.put("secret","4bd4a3b8fdf269b57b48510f236d741a");
+        hm.put("js_code",code);
+        hm.put("grant_type","authorization_code");
+        String doGet = HttpClientUtil.doGet(url, hm);
+        JSONObject jsonObject = JSONObject.parseObject(doGet);
+        String openid = jsonObject.get("openid").toString();
+        if (openid==null){throw new BaseException("openid不存在");}
+        User user = userMapper.getByOpenId(openid);
+        if (user==null){
+            User u=new User();
+            u.setOpenid(openid);
+            u.setCreateTime(LocalDateTime.now());
+            userMapper.add(u);
+            return u;
+        }
+        return user;
     }
 
     //调用微信服务API接口获取用户openid

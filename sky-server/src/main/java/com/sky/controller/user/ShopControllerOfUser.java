@@ -5,7 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user/shop")
 public class ShopControllerOfUser {
     @Autowired
-    private RedisTemplate redisTemplate;
+    private StringRedisTemplate redisTemplate;
 
     /**
      * 用户端店铺状态查询
@@ -34,7 +34,7 @@ public class ShopControllerOfUser {
     @ApiOperation(value = "店铺状态")
     @GetMapping("/status")
     public Result status() {
-        String status = (String) redisTemplate.opsForValue().get("status");
+        Integer status = Integer.valueOf(redisTemplate.opsForValue().get("status"));
         return Result.success(status);
     }
 }
