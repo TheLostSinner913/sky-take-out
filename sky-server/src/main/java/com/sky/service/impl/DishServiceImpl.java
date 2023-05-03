@@ -14,7 +14,7 @@ import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +31,8 @@ public class DishServiceImpl implements DishService {
     private DishMapper dishMapper;
     @Autowired
     private SetMealMapper setMealMapper;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /**
      * 新增菜品
@@ -51,6 +53,7 @@ public class DishServiceImpl implements DishService {
             flavors.get(i).setDishId(dish.getId());
             dishMapper.addFlavor(flavors.get(i));
         }
+        redisTemplate.delete("dish_"+dishDTO.getCategoryId());
         return null;
     }
 
@@ -99,6 +102,7 @@ public class DishServiceImpl implements DishService {
 
             } else dishMapper.deleteFlavor(ids);
         }
+        redisTemplate.delete("dish_*");
         return Result.success();
     }
 
@@ -124,6 +128,7 @@ public class DishServiceImpl implements DishService {
             flavors.get(i).setDishId(dish.getId());
             dishMapper.addNewFlavor(flavors.get(i));
         }
+        redisTemplate.delete("dish_"+dishDTO.getCategoryId());
         return Result.success();
     }
 
@@ -171,6 +176,7 @@ public class DishServiceImpl implements DishService {
         } else if (status == 1) {
             dishMapper.update(dish);
         }
+        redisTemplate.delete("dish_*");
         return Result.success();
     }
 

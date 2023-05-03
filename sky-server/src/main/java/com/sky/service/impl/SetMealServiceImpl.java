@@ -13,6 +13,7 @@ import com.sky.service.SetMealService;
 import com.sky.vo.SetmealVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,7 @@ public class SetMealServiceImpl implements SetMealService {
      * @create 2023/4/25,22:15
      **/
     @Override
+    @CacheEvict(cacheNames = "setmealCache" ,key = "#setmealDTO.categoryId")
     public Result add(SetmealDTO setmealDTO) {
         Setmeal setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealDTO, setmeal);
@@ -83,6 +85,7 @@ public class SetMealServiceImpl implements SetMealService {
      **/
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "setmealCache" ,allEntries = true)
     public Result delete(Long[] ids) {
         Integer delete = setMealMapper.delete(ids);
         if (delete == 0) {
@@ -119,6 +122,7 @@ public class SetMealServiceImpl implements SetMealService {
      **/
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "setmealCache" ,allEntries = true)
     public Result update(SetmealDTO setmealDTO) {
         Setmeal setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealDTO, setmeal);
@@ -145,6 +149,7 @@ public class SetMealServiceImpl implements SetMealService {
      * @create 2023/4/26,14:01
      **/
     @Override
+    @CacheEvict(cacheNames = "setmealCache" ,allEntries = true)
     public Result status(Long id, Integer status) {
         if (status==1){
             //查询套餐关联的菜品是否处于停售状态

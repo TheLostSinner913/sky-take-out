@@ -43,7 +43,6 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .excludePathPatterns("/user/user/login")
                 .excludePathPatterns("/user/shop/status");
     }
-
     /**
      * 通过knife4j生成接口文档
      * @return

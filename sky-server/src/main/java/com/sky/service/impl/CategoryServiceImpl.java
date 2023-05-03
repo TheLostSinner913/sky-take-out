@@ -1,6 +1,5 @@
 package com.sky.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.aop.Redis;
@@ -43,21 +42,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Redis
     public PageResult show(String name, Integer page, Integer pageSize, Integer type) {
-        //从Redis中查找数据
-        String category = redisTemplate.opsForValue().get("categoryP"+page);
-        //查到返回
-        if (category!=null){
-            PageResult pageResult = JSON.parseObject(category, PageResult.class);
-            System.out.println("redis");
-            return pageResult;
-        }
-        //没查到从DB中查找,存入Redis,并返回数据
         PageHelper.startPage(page,pageSize);
         List<Category> show = categoryMapper.show(name, type);
         Page<Category> p= (Page<Category>) show;
         PageResult pageResult=new PageResult(p.getTotal(),p.getResult());
-        redisTemplate.opsForValue().set("categoryP"+page, JSON.toJSONString(pageResult));
-        System.out.println("DB");
         return pageResult;
     }
     /**

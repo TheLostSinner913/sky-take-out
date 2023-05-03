@@ -63,7 +63,7 @@ public class UserLoginController {
     @GetMapping("/category/list")
     @ApiOperation(value = "查询分类")
     public Result show(Integer type) {
-        log.info("查询分类type{}",type);
+        log.info("查询分类type{}", type);
         Result show = userService.show(type);
         return show;
     }
@@ -99,6 +99,7 @@ public class UserLoginController {
 
     /**
      * 根据套餐ID查询包含的菜品
+     *
      * @param id
      * @return com.sky.result.Result
      * @author 刘东钦
@@ -110,15 +111,22 @@ public class UserLoginController {
         return dishId;
     }
 
+    /**
+     * 用户登录
+     * @param userLoginDTO
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/2,15:14
+     **/
     @PostMapping("/user/login")
-    public Result practice(@RequestBody UserLoginDTO userLoginDTO){
+    public Result practice(@RequestBody UserLoginDTO userLoginDTO) {
         String code = userLoginDTO.getCode();
-        String url="https://api.weixin.qq.com/sns/jscode2session";
+        String url = "https://api.weixin.qq.com/sns/jscode2session";
         User user = userService.practice(code, url);
-        HashMap<String,Object>hm=new HashMap<>();
-        hm.put("id",user.getId());
+        HashMap<String, Object> hm = new HashMap<>();
+        hm.put("id", user.getId());
         String token = JwtUtil.createJWT("itheima", 7200000, hm);
-        UserLoginVO userLoginVO=new UserLoginVO();
+        UserLoginVO userLoginVO = new UserLoginVO();
         userLoginVO.setId(user.getId());
         userLoginVO.setOpenid(user.getOpenid());
         userLoginVO.setToken(token);
