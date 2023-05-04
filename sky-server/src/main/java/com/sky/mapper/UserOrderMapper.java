@@ -37,4 +37,7 @@ public interface UserOrderMapper {
 
     //根据订单ID和用户ID获取订单信息
     OrderVO getByOrderIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
+
+    //如果状态为1或2 则直接修改订单状态为6(取消)
+    Integer cancel(@Param("id") Long id);
 }

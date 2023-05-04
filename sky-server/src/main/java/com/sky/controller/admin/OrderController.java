@@ -1,6 +1,8 @@
 package com.sky.controller.admin;
 
 import com.sky.dto.OrdersCancelDTO;
+import com.sky.dto.OrdersConfirmDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
 import io.swagger.annotations.Api;
@@ -27,6 +29,7 @@ public class OrderController {
 
     /**
      * 订单分页查询
+     *
      * @param beginTime
      * @param endTime
      * @param number
@@ -75,6 +78,85 @@ public class OrderController {
     @ApiOperation(value = "统计订单数量", notes = "统计")
     public Result statistics() {
         Result result = orderService.statistics();
+        return result;
+    }
+
+    /**
+     * 完成订单
+     *
+     * @param id
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/4,11:04
+     **/
+    @PutMapping("/complete/{id}")
+    @ApiOperation(value = "完成订单", notes = "完成订单")
+    public Result complete(@PathVariable("id") Long id) {
+        log.info("管理员订单管理-完成订单{}", id);
+        Result result = orderService.complete(id);
+        return result;
+    }
+
+    /**
+     * 订单详情
+     *
+     * @param id
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/4,11:23
+     **/
+    @GetMapping("/details/{id}")
+    @ApiOperation(value = "订单详情", notes = "订单详情")
+    public Result details(@PathVariable("id") Long id) {
+        log.info("管理员订单管理-订单详情{}", id);
+        Result result = orderService.details(id);
+        return result;
+    }
+
+    /**
+     * 接单
+     *
+     * @param confirmDTO
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/4,11:37
+     **/
+    @PutMapping("/confirm")
+    @ApiOperation(value = "确认订单(接单)", notes = "确认订单")
+    public Result confirm(@RequestBody OrdersConfirmDTO confirmDTO) {
+        log.info("管理员订单管理-确认订单(接单){}", confirmDTO);
+        Result result = orderService.confirm(confirmDTO);
+        return result;
+    }
+
+    /**
+     * 拒单
+     *
+     * @param rejectionDTO
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/4,12:07
+     **/
+    @PutMapping("/rejection")
+    @ApiOperation(value = "拒绝订单", notes = "拒绝订单")
+    public Result rejection(@RequestBody OrdersRejectionDTO rejectionDTO) {
+        log.info("管理员订单管理-拒绝订单{}", rejectionDTO);
+        Result result = orderService.rejection(rejectionDTO);
+        return result;
+    }
+
+    /**
+     * 发货
+     * @param id
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/4,13:40
+     **/
+    @PutMapping("/delivery/{id}")
+    @ApiOperation(value = "发货", notes = "发货")
+    public Result deliver(@PathVariable Long id) {
+        log.info("管理员订单管理-发货{}", id);
+        Result result = orderService.deliver(id);
         return result;
     }
 }

@@ -42,8 +42,8 @@ public interface ShoppingCarMapper {
     @Delete("delete from shopping_cart where id=#{id}")
     void deleteOne(ShoppingCart cart);
 
-    //分页查询订单历史记录
-
     //查询历史订单的详细信息
     List<OrderDetail> getByOrderId(@Param("id") Long id);
+    //再来一单
+    void add(ShoppingCart shoppingCart);
 }

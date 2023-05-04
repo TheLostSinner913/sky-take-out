@@ -5,6 +5,7 @@ import com.sky.vo.OrderVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,4 +33,20 @@ public interface AdminOrderMapper {
     //统计派送中数量
     @Select("select count(*) from orders where status = 4")
     Integer deliveryInProgress();
+    //完成订单
+    @Update("update orders set status = 5 where id = #{id}")
+    Integer complete(Long id);
+    //根据id查询订单信息
+    @Select("select * from orders where id = #{id}")
+    OrderVO msg(Long id);
+
+    //确认订单(接单)
+    @Update("update orders set status =3  where id = #{id} and status = 2")
+    Integer confirm(@Param("id") Long id, @Param("status") Integer status);
+
+    //拒绝订单
+    Integer reject(@Param("rejectionReason") String rejectionReason, @Param("id") Long id, @Param("cancelTime") LocalDateTime cancelTime);
+
+    //发货
+    Integer deliver(@Param("id") Long id);
 }

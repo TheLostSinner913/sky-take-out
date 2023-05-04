@@ -1,6 +1,8 @@
 package com.sky.service;
 
 import com.sky.dto.OrdersCancelDTO;
+import com.sky.dto.OrdersConfirmDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.result.Result;
 
 import java.time.LocalDateTime;
@@ -18,4 +20,13 @@ public interface OrderService {
 
     Result statistics();
 
+    Result complete(Long id);
+
+    Result details(Long id);
+
+    Result confirm(OrdersConfirmDTO confirmDTO);
+
+    Result rejection(OrdersRejectionDTO rejectionDTO);
+
+    Result deliver(Long id);
 }

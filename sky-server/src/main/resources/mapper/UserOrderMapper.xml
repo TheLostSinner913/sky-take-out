@@ -27,6 +27,7 @@
                 and status = #{status}
             </if>
         </where>
+        order by order_time desc
     </select>
 
     <select id="getByOrderIdAndUserId" resultType="com.sky.vo.OrderVO">
@@ -37,4 +38,10 @@
               and user_id = #{userId}
         </where>
     </select>
+
+    <update id="cancel">
+        update orders
+        set status=6, cancel_time=now()
+        where id=#{id}
+    </update>
 </mapper>

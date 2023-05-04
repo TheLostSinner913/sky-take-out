@@ -14,4 +14,9 @@ public interface UserOrderService {
     Result findOld(Integer page, Integer pageSize, Integer status);
 
     Result findOrderDetail(Long id);
+
+    Result cancel(Long id);
+
+    Result again(Long id);
+
 }

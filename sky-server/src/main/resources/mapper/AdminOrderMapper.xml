@@ -31,4 +31,22 @@
             cancel_reason = #{cancelReason}
         where id = #{orderId}
     </update>
+
+    <update id="reject">
+        update orders
+        <set>
+            <if test="rejectionReason != null and rejectionReason != ''">rejection_reason = #{rejectionReason},
+            </if>
+            <if test="cancelTime != null">cancel_time=#{cancelTime},
+            </if>
+            status = 6,
+        </set>
+        where id=#{id} and status=2
+    </update>
+
+    <update id="deliver">
+        update orders
+        set status = 4
+        where id = #{id} and status = 3
+    </update>
 </mapper>

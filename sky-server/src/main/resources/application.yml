@@ -49,6 +49,10 @@ sky:
   wechat:
     appid: ${sky.wechat.appid}
     secret: ${sky.wechat.secret}
+  shop:
+    address: 天津市和平区南京路10号
+  baidu:
+    ak: 0gK0gF8K0CQf3DUWwyvEKDFxaKqDtB3A
 aliyun:
   oss:
     endpoint: https://oss-cn-beijing.aliyuncs.com

@@ -109,7 +109,6 @@ public class UserOrderServiceImpl implements UserOrderService {
             List<OrderDetail> details = userOrderMapper.getByOrderId(orderId);
             orderVO.setOrderDetailList(details);
         }
-        System.out.println(show);
         Page<OrderVO> p = (Page<OrderVO>) show;
         PageResult pageResult = new PageResult(p.getTotal(), p.getResult());
         return Result.success(pageResult);
@@ -132,5 +131,58 @@ public class UserOrderServiceImpl implements UserOrderService {
         OrderVO orderVO = userOrderMapper.getByOrderIdAndUserId(id, userId);
         orderVO.setOrderDetailList(details);
         return Result.success(orderVO);
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param id
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/4,14:00
+     **/
+    @Override
+    public Result cancel(Long id) {
+        Long userId = BaseContext.getCurrentId();
+        //根据ID 和 userId 获取订单信息
+        OrderVO orderVO = userOrderMapper.getByOrderIdAndUserId(id, userId);
+        //如果订单状态为待付款或待接单状态->直接取消
+        if (orderVO.getStatus() == 1 || orderVO.getStatus() == 2) {
+            userOrderMapper.cancel(id);
+            return Result.success();
+            //如果订单状态为已接单或派送中,则抛出异常需要联系客服
+        } else if (orderVO.getStatus() == 3) {
+            throw new BaseException("订单已接单,请联系客服");
+        } else if (orderVO.getStatus() == 4) {
+            throw new BaseException("订单派送中,请联系客服");
+            //如果订单状态为待接单,需修改状态为6,并退款
+        } else if (orderVO.getStatus() == 5) {
+            userOrderMapper.cancel(id);
+            //todo 退款
+        }
+        return Result.success();
+    }
+
+    /**
+     * 再来一单
+     * @param id
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/4,14:17
+     **/
+    @Override
+    public Result again(Long id) {
+        //将订单为id的商品添加到购物车
+        Long userId = BaseContext.getCurrentId();
+        //根据userId 和id查询订单详情
+        List<OrderDetail> details = userOrderMapper.getByOrderId(id);
+        for (OrderDetail detail : details) {
+            //将订单详情信息添加到购物车
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(detail, shoppingCart);
+            shoppingCart.setUserId(userId);
+            shoppingCarMapper.add(shoppingCart);
+        }
+        return Result.success();
     }
 }
