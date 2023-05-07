@@ -14,7 +14,6 @@ import com.sky.service.OrderService;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,11 +28,22 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
     @Autowired
     private AdminOrderMapper adminOrderMapper;
-    @Value("${sky.shop.address}")
-    private String shopAddress;
-    @Value("${sky.baidu.ak}")
-    private String ak;
 
+
+    /**
+     * 订单分页查询
+     *
+     * @param beginTime
+     * @param endTime
+     * @param number
+     * @param page
+     * @param pageSize
+     * @param phone
+     * @param status
+     * @return com.sky.result.Result
+     * @author 刘东钦
+     * @create 2023/5/3,23:58
+     **/
     @Override
     public Result conditionSearch(Integer page, Integer pageSize, LocalDateTime beginTime, LocalDateTime endTime, Integer number, String phone, Integer status) {
         PageHelper.startPage(page, pageSize);
@@ -114,6 +124,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 订单详情
+     *
      * @param id
      * @return com.sky.result.Result
      * @author 刘东钦
@@ -125,7 +136,7 @@ public class OrderServiceImpl implements OrderService {
         OrderVO orderVO = adminOrderMapper.msg(id);
         //根据id查询订单详细信息
         List<OrderDetail> orderDetails = adminOrderMapper.orderDetail(id);
-        StringBuilder sb=new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (OrderDetail detail : orderDetails) {
             //拼接name和number
             sb.append(detail.getName()).append("x").append(detail.getNumber()).append(",");
@@ -134,8 +145,10 @@ public class OrderServiceImpl implements OrderService {
         orderVO.setOrderDishes(sb.toString());
         return Result.success(orderVO);
     }
+
     /**
      * 接单
+     *
      * @param confirmDTO
      * @return com.sky.result.Result
      * @author 刘东钦
@@ -145,14 +158,16 @@ public class OrderServiceImpl implements OrderService {
     public Result confirm(OrdersConfirmDTO confirmDTO) {
         Long id = confirmDTO.getId();
         Integer status = confirmDTO.getStatus();
-        Integer confirm = adminOrderMapper.confirm(id,status);
-        if (confirm==0){
+        Integer confirm = adminOrderMapper.confirm(id, status);
+        if (confirm == 0) {
             throw new BaseException("订单不存在");
         }
         return Result.success();
     }
+
     /**
      * 拒单
+     *
      * @param rejectionDTO
      * @return com.sky.result.Result
      * @author 刘东钦
@@ -164,14 +179,16 @@ public class OrderServiceImpl implements OrderService {
         String rejectionReason = rejectionDTO.getRejectionReason();
         LocalDateTime cancelTime = LocalDateTime.now();
         Integer reject = adminOrderMapper.reject(rejectionReason, id, cancelTime);
-        if (reject==0){
+        if (reject == 0) {
             throw new BaseException("无法拒单");
         }
         //todo 如果是已支付状态，需要退款
         return Result.success();
     }
+
     /**
      * 发货
+     *
      * @param id
      * @return com.sky.result.Result
      * @author 刘东钦
@@ -180,7 +197,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Result deliver(Long id) {
         Integer deliver = adminOrderMapper.deliver(id);
-        if (deliver==0){
+        if (deliver == 0) {
             throw new BaseException("无法发货");
         }
         return Result.success();

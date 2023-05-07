@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.context.BaseContext;
@@ -14,13 +15,20 @@ import com.sky.mapper.UserOrderMapper;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.UserOrderService;
+import com.sky.utils.MyHttpClient;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -29,11 +37,48 @@ import java.util.List;
  * @Date: 2023/5/3 14:15
  */
 @Service
+@Slf4j
 public class UserOrderServiceImpl implements UserOrderService {
     @Autowired
     private UserOrderMapper userOrderMapper;
     @Autowired
     private ShoppingCarMapper shoppingCarMapper;
+    @Autowired
+    private WebSocketServer webSocketServer;
+    @Value("${sky.shop.address}")
+    private String shopAddress;
+    @Value("${sky.baidu.ak}")
+    private String ak;
+
+    //确认距离
+    public String distance(String addr) throws IOException, URISyntaxException {
+        //商户地址经纬度
+        String url = "https://api.map.baidu.com/geocoding/v3";
+        HashMap<String, String> hm = new HashMap<>();
+        hm.put("address", shopAddress);
+        hm.put("output", "json");
+        hm.put("ak", ak);
+        String s = MyHttpClient.HttpGet(url, hm);
+        String lng = JSONObject.parseObject(s).getJSONObject("result").getJSONObject("location").get("lng").toString();
+        String lat = JSONObject.parseObject(s).getJSONObject("result").getJSONObject("location").get("lat").toString();
+        //用户地址经纬度
+        hm.put("address", addr);
+        String s1 = MyHttpClient.HttpGet(url, hm);
+        String lng1 = JSONObject.parseObject(s1).getJSONObject("result").getJSONObject("location").get("lng").toString();
+        String lat1 = JSONObject.parseObject(s1).getJSONObject("result").getJSONObject("location").get("lat").toString();
+        //计算距离
+        hm.put("origin", lat + "," + lng);
+        hm.put("destination", lat1 + "," + lng1);
+        hm.put("steps_info", "0");
+        String url1 = "https://api.map.baidu.com/directionlite/v1/driving";
+        String s2 = MyHttpClient.HttpGet(url1, hm);
+        JSONObject jsonObject = JSONObject.parseObject(s2);
+        //判断距离是否大于5000米
+        String distance = jsonObject.getJSONObject("result").getJSONArray("routes")
+                .getJSONObject(0).get("distance").toString();
+        log.info("距离为：" + distance);
+        return distance;
+    }
 
     /**
      * 用户订单确认
@@ -44,7 +89,7 @@ public class UserOrderServiceImpl implements UserOrderService {
      * @create 2023/5/3,14:24
      **/
     @Override
-    public Result submit(OrdersSubmitDTO ordersSubmitDTO) {
+    public Result submit(OrdersSubmitDTO ordersSubmitDTO) throws IOException, URISyntaxException {
         Orders orders = new Orders();
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
         Long userId = BaseContext.getCurrentId();
@@ -55,11 +100,13 @@ public class UserOrderServiceImpl implements UserOrderService {
         AddressBook address = userOrderMapper.getAddress(bookId, userId);
         if (address == null) {
             throw new BaseException("请填写收货地址");
+        } else if (Integer.valueOf(distance(address.getDetail())) > 5000) {
+            throw new BaseException("超出配送范围");
         }
         //构造Orders信息
         orders.setUserId(userId);
         orders.setStatus(1);
-        orders.setPayStatus(Orders.PENDING_PAYMENT);
+        orders.setPayStatus(0);
         orders.setPhone(address.getPhone());
         orders.setAddress(address.getDetail());
         orders.setConsignee(address.getConsignee());
@@ -165,6 +212,7 @@ public class UserOrderServiceImpl implements UserOrderService {
 
     /**
      * 再来一单
+     *
      * @param id
      * @return com.sky.result.Result
      * @author 刘东钦
@@ -184,5 +232,26 @@ public class UserOrderServiceImpl implements UserOrderService {
             shoppingCarMapper.add(shoppingCart);
         }
         return Result.success();
+    }
+
+    /**
+     * 催单
+     * @param id
+     * @return void
+     * @author 刘东钦
+     * @create 2023/5/7,11:43
+     **/
+    @Override
+    public void reminder(Long id) {
+        //根据订单id查询订单信息
+        Orders order = userOrderMapper.getById(id);
+        if (order==null){
+            throw new BaseException("订单不存在");
+        }
+        HashMap hm=new HashMap();
+        hm.put("tpye",2);
+        hm.put("orderId",id);
+        hm.put("content","订单号:"+order.getNumber()+"的订单已催单");
+        webSocketServer.sendToAllClient(JSONObject.toJSONString(hm));
     }
 }

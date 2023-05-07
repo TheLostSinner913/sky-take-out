@@ -49,7 +49,7 @@ public class OrderController {
                                   Integer pageSize, String phone,
                                   Integer status) {
         log.info("管理员订单管理-条件查询{},{},{},{},{},{},{}", beginTime, endTime, number, page, pageSize, phone, status);
-        Result result = orderService.conditionSearch(page, pageSize, beginTime, endTime, number, phone, status);
+        Result result = orderService.conditionSearch( page, pageSize, beginTime, endTime, number, phone, status);
         return result;
     }
 

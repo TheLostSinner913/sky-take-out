@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 /**
  * @Description:
  * @Author: 刘东钦
@@ -32,7 +35,7 @@ public class UserOrderController {
      **/
     @PostMapping("/submit")
     @ApiOperation(value = "用户订单确认", notes = "用户订单确认")
-    public Result OrderSubmit(@RequestBody OrdersSubmitDTO ordersSubmitDTO) {
+    public Result OrderSubmit(@RequestBody OrdersSubmitDTO ordersSubmitDTO) throws IOException, URISyntaxException {
         log.info("订单确认{}", ordersSubmitDTO);
         Result submit = orderService.submit(ordersSubmitDTO);
         return submit;
@@ -86,8 +89,8 @@ public class UserOrderController {
     @ApiOperation(value = "催单", notes = "催单")
     public Result reminder(@PathVariable Long id) {
         log.info("催单{}", id);
-        //todo
-        return null;
+        orderService.reminder(id);
+        return Result.success();
     }
 
     /**

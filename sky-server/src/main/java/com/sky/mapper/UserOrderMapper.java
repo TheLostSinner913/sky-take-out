@@ -40,4 +40,7 @@ public interface UserOrderMapper {
 
     //如果状态为1或2 则直接修改订单状态为6(取消)
     Integer cancel(@Param("id") Long id);
+    //根据订单id查询订单
+    @Select("select * from orders where id=#{id}")
+    Orders getById(Long id);
 }

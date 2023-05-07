@@ -1,6 +1,7 @@
 package com.sky.mapper;
 
 import com.sky.entity.OrderDetail;
+import com.sky.entity.Orders;
 import com.sky.vo.OrderVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -49,4 +50,10 @@ public interface AdminOrderMapper {
 
     //发货
     Integer deliver(@Param("id") Long id);
+
+    //定时查询超时订单
+    @Select("select * from orders where order_time < #{time}  and status = #{status}")
+    List<Orders> checkOverTime(@Param("time") LocalDateTime time, @Param("status") Integer status);
+    //定时取消超时订单
+    void update(Orders order);
 }

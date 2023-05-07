@@ -59,3 +59,6 @@ aliyun:
     access-key-id: LTAI5tAmP1YpZDTWQFdW1k6Q
     accessKeySecret: ZpE9sp5aCyhDV1VpFvhsR99Z81qk5M
     bucket-name: test-913
+#慢查询日志
+spring.datasource.druid.filter.stat.log-slow-sql: true
+spring.datasource.druid.filter.stat.slow-sql-millis: 1000
