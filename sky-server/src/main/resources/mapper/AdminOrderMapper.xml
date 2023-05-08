@@ -62,4 +62,8 @@
             cancel_reason=#{cancelReason}
         where id = #{id}
     </update>
+
+    <select id="againOverTime" resultType="com.sky.entity.Orders">
+        select * from orders where #{time}>=orders.order_time and status=1
+    </select>
 </mapper>

@@ -203,7 +203,7 @@ public class UserOrderServiceImpl implements UserOrderService {
         } else if (orderVO.getStatus() == 4) {
             throw new BaseException("订单派送中,请联系客服");
             //如果订单状态为待接单,需修改状态为6,并退款
-        } else if (orderVO.getStatus() == 5) {
+        } else if (orderVO.getStatus() == 2) {
             userOrderMapper.cancel(id);
             //todo 退款
         }

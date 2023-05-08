@@ -1,14 +1,9 @@
 package com.sky.task;
 
-import com.sky.entity.Orders;
 import com.sky.mapper.AdminOrderMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * @Description: 定时任务
@@ -28,7 +23,7 @@ public class MyTask {
      * @create 2023/5/7,10:35
      **/
     //每十秒自动运行
-    @Scheduled(cron = "0/30 * * * * ?")
+    /*@Scheduled(cron = "0/30 * * * * ?")
     public void autoCancelOrder() {
         log.info("定时任务-自动取消订单");
         LocalDateTime time = LocalDateTime.now().plusMinutes(-15);
@@ -44,5 +39,5 @@ public class MyTask {
                 orderMapper.update(order);
             }
         }
-    }
+    }*/
 }

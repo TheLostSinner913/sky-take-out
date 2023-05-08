@@ -56,4 +56,7 @@ public interface AdminOrderMapper {
     List<Orders> checkOverTime(@Param("time") LocalDateTime time, @Param("status") Integer status);
     //定时取消超时订单
     void update(Orders order);
+
+    //练习
+    List<Orders> againOverTime(@Param("time") LocalDateTime time);
 }

@@ -2,14 +2,21 @@ package com.sky.service.impl;
 
 import com.sky.dto.GoodsSalesDTO;
 import com.sky.mapper.ReportMapper;
+import com.sky.mapper.WorkSpaceMapper;
 import com.sky.service.ReportService;
-import com.sky.vo.OrderReportVO;
-import com.sky.vo.SalesTop10ReportVO;
-import com.sky.vo.TurnoverReportVO;
-import com.sky.vo.UserReportVO;
+import com.sky.service.WorkSpaceService;
+import com.sky.vo.*;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,6 +31,10 @@ import java.util.List;
 public class ReportServiceImpl implements ReportService {
     @Autowired
     private ReportMapper reportMapper;
+    @Autowired
+    private WorkSpaceMapper workSpaceMapper;
+    @Autowired
+    private WorkSpaceService workSpaceService;
 
     /**
      * 营业额统计
@@ -137,9 +148,9 @@ public class ReportServiceImpl implements ReportService {
         Integer orderDaily = reportMapper.doneOrderDaily(end);
         String validOrderCountList = sbDoneDaily.append(orderDaily).toString();
         //统计订单总数量
-        Integer totalOrderCount = reportMapper.orderTotal(begin,end);
+        Integer totalOrderCount = reportMapper.orderTotal(begin, end);
         //统计有效订单总数量
-        Integer validOrderCount = reportMapper.doneOrderTotal(begin,end);
+        Integer validOrderCount = reportMapper.doneOrderTotal(begin, end);
         //统计订单完成率 = 有效订单总数量/订单总数量
         Double orderCompletionRate = (double) validOrderCount / totalOrderCount;
         OrderReportVO orderReportVO = new OrderReportVO();
@@ -151,8 +162,10 @@ public class ReportServiceImpl implements ReportService {
         orderReportVO.setOrderCompletionRate(orderCompletionRate);
         return orderReportVO;
     }
+
     /**
      * 商品热销top10
+     *
      * @param begin
      * @param end
      * @return com.sky.result.Result
@@ -164,8 +177,8 @@ public class ReportServiceImpl implements ReportService {
         LocalDateTime begin1 = LocalDateTime.of(begin, LocalTime.MIN);
         LocalDateTime end1 = LocalDateTime.of(end, LocalTime.MAX);
         LocalDateTime localDateTime = end1.plusDays(1);
-        StringBuilder sbName= new StringBuilder();
-        StringBuilder sbCount= new StringBuilder();
+        StringBuilder sbName = new StringBuilder();
+        StringBuilder sbCount = new StringBuilder();
         //统计销量前十的商品
         List<GoodsSalesDTO> goodsSalesDTOS = reportMapper.top10(begin1, localDateTime);
         System.out.println(goodsSalesDTOS);
@@ -175,7 +188,59 @@ public class ReportServiceImpl implements ReportService {
         }
         String a = sbName.toString();
         String b = sbCount.toString();
-        SalesTop10ReportVO top10=new SalesTop10ReportVO(a,b);
+        SalesTop10ReportVO top10 = new SalesTop10ReportVO(a, b);
         return top10;
+    }
+
+    @Override
+    public void export(HttpServletResponse response) throws IOException {
+        LocalDate endDate = LocalDate.now();
+        LocalDate beginDate = endDate.minusDays(29);
+        LocalDateTime begin = LocalDateTime.of(beginDate, LocalTime.MIN);
+        LocalDateTime end = LocalDateTime.of(endDate, LocalTime.MAX);
+        //获取概览数据
+        BusinessDataVO businessDataVO = workSpaceService.businessData(begin, end);
+        FileInputStream fis = new FileInputStream(new File("D:\\Java\\sky-take-out\\sky-server\\src\\main\\resources\\运营数据报表模板.xlsx"));
+        XSSFWorkbook excel = new XSSFWorkbook(fis);
+        //获取标签页 Sheet
+        XSSFSheet sheet1 = excel.getSheet("Sheet1");
+        //获取第二行
+        XSSFRow row2 = sheet1.getRow(1);
+        row2.getCell(1).setCellValue(beginDate + "至" + endDate);
+        //获取第四行 第二列
+        XSSFRow row4 = sheet1.getRow(3);
+        row4.getCell(2).setCellValue(businessDataVO.getTurnover());
+        //第四列
+        row4.getCell(4).setCellValue(businessDataVO.getOrderCompletionRate());
+        //第六列
+        row4.getCell(6).setCellValue(businessDataVO.getNewUsers());
+        //获取第五行 第二列
+        XSSFRow row5 = sheet1.getRow(4);
+        row5.getCell(2).setCellValue(businessDataVO.getValidOrderCount());
+        //第四列
+        row5.getCell(4).setCellValue(businessDataVO.getUnitPrice());
+        //获取明细数据(30天)
+        for (int i = 0; i < 30; i++) {
+            LocalDate date = beginDate.plusDays(i);
+            LocalDateTime begin1 = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime end1 = LocalDateTime.of(date, LocalTime.MAX);
+            BusinessDataVO dataVO = workSpaceService.businessData(begin1, end1);
+            //获得第八行
+            XSSFRow row = sheet1.getRow(7 + i);
+            row.getCell(1).setCellValue(date.toString());
+            row.getCell(2).setCellValue(dataVO.getTurnover());
+            row.getCell(3).setCellValue(dataVO.getValidOrderCount());
+            row.getCell(4).setCellValue(dataVO.getOrderCompletionRate());
+            row.getCell(5).setCellValue(dataVO.getUnitPrice());
+            row.getCell(6).setCellValue(dataVO.getNewUsers());
+        }
+
+
+        //获得输出流
+        ServletOutputStream outputStream = response.getOutputStream();
+        excel.write(outputStream);
+        excel.close();
+        fis.close();
+        outputStream.close();
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 
 /**
@@ -97,5 +99,10 @@ public class reportController {
             , @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
         log.info("商品销量top10{}-{}", begin, end);
         return Result.success(reportService.top10(begin, end));
+    }
+    @GetMapping("/export")
+    @ApiOperation(value = "导出报表")
+    public void export(HttpServletResponse response) throws IOException {
+        reportService.export(response);
     }
 }
